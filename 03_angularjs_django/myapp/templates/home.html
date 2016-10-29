@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+{% load staticfiles %}
+<script src="{% static 'angular.min.js' %}"></script>
+<body ng-app="myApp" ng-controller="myCtrl" >
+	<table>
+	<tr>
+		<th>Name</th>
+		<th>Extension</th>
+	</tr>
+	<tr ng-repeat="i in mydata track by $index" >
+		<td><input type="text" ng-model= " mydata[$index].name "/></td>
+		<td><input type="text" ng-model= " mydata[$index].ext "/></td>
+	</tr>
+	</table>
+	
+	<button ng-click="getpost()">submit</button>
+</body>
+<script>
+	var app = angular.module('myApp', [])
+	app.config(function($httpProvider) {
+		$httpProvider.defaults.xsrfCookieName = 'csrftoken';
+		$httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+	});
+	app.config(function($interpolateProvider) {
+		$interpolateProvider.startSymbol('[[');
+		$interpolateProvider.endSymbol(']]');
+	});
+	app.controller('myCtrl', function($scope,$http) {
+		//$scope.newdata={}
+		$scope.mydata=[]
+		$http.get("{% url 'myapp:getpost' %}")
+		.then(function(response) {
+			$scope.mydata = response.data;
+			console.log( JSON.stringify($scope.mydata ))
+		});
+
+		$scope.getpost = function(){
+			$http.post("{% url 'myapp:getpost' %}", $scope.mydata)
+			.then(function(response) {
+				$scope.mydata = response.data;
+				console.log( JSON.stringify($scope.mydata ))
+			});
+		}
+	});
+</script>
+</html>
